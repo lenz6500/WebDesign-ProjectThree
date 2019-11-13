@@ -25,19 +25,24 @@ var db = new sqlite3.Database(db_filename, sqlite3.OPEN_READONLY, (err) => {
 });
 
 db.all("SELECT * FROM Codes ORDER BY code", (err, rows) => {
+	var cObject;
 	for(var i = 0; i < rows.length; i++){
-		codesObject[rows[i].code] = rows[i].incident_type;
+		cObject = 'C' + rows[i].code;
+		codesObject[cObject] = rows[i].incident_type;
+		//codesObject[rows[i].code] = rows[i].incident_type;
 	}
 });
 
 db.all("SELECT * FROM Neighborhoods ORDER BY neighborhood_number", (err, rows) => {
+	var nObject;
 	for(var i = 0; i < rows.length; i++){
-		neighborhoodsObject[rows[i].neighborhood_number] = rows[i].neighborhood_name;
+		nObject = 'N' + rows[i].neighborhood_number;
+		neighborhoodsObject[nObject] = rows[i].neighborhood_name;
 	}
 });
 
 /* Need to fix this */
-db.all("SELECT * FROM Incidents ORDER BY date_time DESC", (err, rows) => {
+db.all("SELECT * FROM Incidents ORDER BY case_number DESC", (err, rows) => {
 	for(var i = 0; i < rows.length; i++){
 		var newDate = rows[i].date_time.substring(0,10);
 		var newTime = rows[i].date_time.substring(11);
