@@ -4,6 +4,7 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var json2xml = require('json2xml');
 var sqlite3 = require('sqlite3');
+var sortObj = require('sort-object');
 
 var port = 8000;
 var db_filename = path.join(__dirname, 'db', 'stpaul_crime.sqlite3');
@@ -41,11 +42,11 @@ db.all("SELECT * FROM Neighborhoods ORDER BY neighborhood_number", (err, rows) =
 	}
 });
 
-/* Need to fix this */
 db.all("SELECT * FROM Incidents ORDER BY case_number DESC", (err, rows) => {
 	for(var i = 0; i < rows.length; i++){
 		var newDate = rows[i].date_time.substring(0,10);
 		var newTime = rows[i].date_time.substring(11);
+		var iObject;
 		var report = {
 			date: newDate,
 			time: newTime,
@@ -55,11 +56,9 @@ db.all("SELECT * FROM Incidents ORDER BY case_number DESC", (err, rows) => {
 			neighborhood_number: rows[i].neighborhood_number,
 			block: rows[i].block
 		};
-		incidentsObject[rows[i].case_number] = report;
+		iObject = 'I' + rows[i].case_number;
+		incidentsObject[iObject] = report;
 	}
-	incidentsObject.sort(function(a, b){
-		return b[rows[i].case_number] - a[rows[i].case_number];
-	});
 });
 
 
