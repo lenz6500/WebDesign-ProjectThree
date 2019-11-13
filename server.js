@@ -2,7 +2,7 @@ var fs = require('fs');
 var path = require('path');
 var express = require('express');
 var bodyParser = require('body-parser');
-var json2xml = require('json2xml');
+var js2xmlparser = require('js2xmlparser');
 var sqlite3 = require('sqlite3');
 
 var port = 8000;
@@ -42,7 +42,8 @@ db.all("SELECT * FROM Neighborhoods ORDER BY neighborhood_number", (err, rows) =
 });
 
 /* Need to fix this */
-db.all("SELECT * FROM Incidents ORDER BY case_number DESC", (err, rows) => {
+db.all("SELECT * FROM Incidents ORDER BY date_time DESC LIMIT 10000", (err, rows) => {
+    var iObject;
 	for(var i = 0; i < rows.length; i++){
 		var newDate = rows[i].date_time.substring(0,10);
 		var newTime = rows[i].date_time.substring(11);
@@ -55,20 +56,38 @@ db.all("SELECT * FROM Incidents ORDER BY case_number DESC", (err, rows) => {
 			neighborhood_number: rows[i].neighborhood_number,
 			block: rows[i].block
 		};
-		incidentsObject[rows[i].case_number] = report;
+        iObject = 'I' + rows[i].case_number;
+		incidentsObject[iObject] = report;
 	}
-	/*incidentsObject.sort(function(a, b){
-		return b[rows[i].case_number] - a[rows[i].case_number];
-	});*/
 });
 
 
 app.get('/codes', (req, res) => {
-    var range = codesObject.length;
+    var range = Object.keys(codesObject).length;
     var lowerRange = 0;
     var upperRange = 0;
+    var format = 'json';
 
-    if (req.query.code != null){
+    if (req.query.code != null && req.query.format != null){
+        range = req.query.code;
+        format = req.query.format;
+        lowerRange = range.slice(0, range.indexOf(','));
+        upperRange = range.slice(range.indexOf(',')+1);
+        var newCodesObject = new Object;
+        var keys = Object.keys(codesObject);
+        for (var i = 0; i < keys.length; i++){
+            if (parseInt(keys[i].slice(1)) >= lowerRange && parseInt(keys[i].slice(1)) <= upperRange){
+                newCodesObject[keys[i]]=codesObject[keys[i]];
+            }
+        }
+        if (format == 'xml'){
+            res.type('xml').send(js2xmlparser.parse("Codes", codesObject));
+        }
+        else{
+            res.type('json').send(JSON.stringify(codesObject, null, 4));
+        }
+    }
+    else if (req.query.code != null && req.query.format == null){
         range = req.query.code;
         lowerRange = range.slice(0, range.indexOf(','));
         upperRange = range.slice(range.indexOf(',')+1);
@@ -79,15 +98,72 @@ app.get('/codes', (req, res) => {
                 newCodesObject[keys[i]]=codesObject[keys[i]];
             }
         }
-        res.type('json').send(JSON.stringify(newCodesObject, null, 4));
+        res.type(format).send(JSON.stringify(newCodesObject, null, 4));
+    }
+    else if (req.query.code == null && req.query.format != null){
+        format = req.query.format;
+        if (format == 'xml'){
+            res.type('xml').send(js2xmlparser.parse("Codes", codesObject));
+        }
+        else{
+            res.type('json').send(JSON.stringify(codesObject, null, 4));
+        }
     }
     else{
-        res.type('json').send(JSON.stringify(codesObject, null, 4));
+        res.type(format).send(JSON.stringify(codesObject, null, 4));
     }
 });
 
 app.get('/neighborhoods', (req, res) => {
-	res.type('json').send(JSON.stringify(neighborhoodsObject, null, 4));
+    var range = Object.keys(neighborhoodsObject).length;
+    var lowerRange = 0;
+    var upperRange = 0;
+    var format = 'json';
+
+    if (req.query.id != null && req.query.format != null){
+        range = req.query.id;
+        format = req.query.format;
+        lowerRange = range.slice(0, range.indexOf(','));
+        upperRange = range.slice(range.indexOf(',')+1);
+        var newNeighborhoodsObject = new Object;
+        var keys = Object.keys(neighborhoodsObject);
+        for (var i = 0; i < keys.length; i++){
+            if (parseInt(keys[i].slice(1)) >= lowerRange && parseInt(keys[i].slice(1)) <= upperRange){
+                newNeighborhoodsObject[keys[i]]=neighborhoodsObject[keys[i]];
+            }
+        }
+        if (format == 'xml'){
+            res.type('xml').send(js2xmlparser.parse("Neighborhoods", newNeighborhoodsObject));
+        }
+        else{
+            res.type('json').send(JSON.stringify(newNeighborhoodsObject, null, 4));
+        }
+    }
+    else if (req.query.id != null && req.query.format == null){
+        range = req.query.id;
+        lowerRange = range.slice(0, range.indexOf(','));
+        upperRange = range.slice(range.indexOf(',')+1);
+        var newNeighborhoodsObject = new Object;
+        var keys = Object.keys(neighborhoodsObject);
+        for (var i = 0; i < keys.length; i++){
+            if (parseInt(keys[i].slice(1)) >= lowerRange && parseInt(keys[i].slice(1)) <= upperRange){
+                newNeighborhoodsObject[keys[i]]=neighborhoodsObject[keys[i]];
+            }
+        }
+        res.type(format).send(JSON.stringify(newNeighborhoodsObject, null, 4));
+    }
+    else if (req.query.id == null && req.query.format != null){
+        format = req.query.format;
+        if (format == 'xml'){
+            res.type('xml').send(js2xmlparser.parse("Neighborhoods", neighborhoodsObject));
+        }
+        else{
+            res.type('json').send(JSON.stringify(neighborhoodsObject, null, 4));
+        }
+    }
+    else{
+        res.type(format).send(JSON.stringify(neighborhoodsObject, null, 4));
+    }
 });
 
 app.get('/incidents', (req, res) => {
