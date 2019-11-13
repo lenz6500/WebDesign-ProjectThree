@@ -4,6 +4,7 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var js2xmlparser = require('js2xmlparser');
 var sqlite3 = require('sqlite3');
+var sortObj = require('sort-object');
 
 var port = 8000;
 var db_filename = path.join(__dirname, 'db', 'stpaul_crime.sqlite3');
@@ -47,6 +48,7 @@ db.all("SELECT * FROM Incidents ORDER BY date_time DESC LIMIT 10000", (err, rows
 	for(var i = 0; i < rows.length; i++){
 		var newDate = rows[i].date_time.substring(0,10);
 		var newTime = rows[i].date_time.substring(11);
+		var iObject;
 		var report = {
 			date: newDate,
 			time: newTime,
