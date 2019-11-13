@@ -59,11 +59,36 @@ db.all("SELECT * FROM Incidents ORDER BY case_number DESC", (err, rows) => {
 		iObject = 'I' + rows[i].case_number;
 		incidentsObject[iObject] = report;
 	}
+<<<<<<< HEAD
+=======
+	/*incidentsObject.sort(function(a, b){
+		return b[rows[i].case_number] - a[rows[i].case_number];
+	});*/
+>>>>>>> f95f2652c8e75cbbc1d7b73619b37a7c9608603b
 });
 
 
 app.get('/codes', (req, res) => {
-	res.type('json').send(JSON.stringify(codesObject, null, 4));
+    var range = codesObject.length;
+    var lowerRange = 0;
+    var upperRange = 0;
+
+    if (req.query.code != null){
+        range = req.query.code;
+        lowerRange = range.slice(0, range.indexOf(','));
+        upperRange = range.slice(range.indexOf(',')+1);
+        var newCodesObject = new Object;
+        var keys = Object.keys(codesObject);
+        for (var i = 0; i < keys.length; i++){
+            if (parseInt(keys[i].slice(1)) >= lowerRange && parseInt(keys[i].slice(1)) <= upperRange){
+                newCodesObject[keys[i]]=codesObject[keys[i]];
+            }
+        }
+        res.type('json').send(JSON.stringify(newCodesObject, null, 4));
+    }
+    else{
+        res.type('json').send(JSON.stringify(codesObject, null, 4));
+    }
 });
 
 app.get('/neighborhoods', (req, res) => {
@@ -75,26 +100,29 @@ app.get('/incidents', (req, res) => {
 });
 
 app.put('/new_incident', (req, res) => {
-	var newUser = {
-		id: parseInt(req.body.id, 10),
-		name: req.body.name,
-		email: req.body.email
+    newCaseNumber = req.body.case_number;
+	var newIncident = {
+        date: req.body.date,
+        time: req.body.time,
+        code: req.body.code,
+        incident: req.body.incident,
+        police_grid: req.body.police_grid,
+        neighborhood_number: req.body.neighborhood_number,
+        block: req.body.block
 	};
 
 	var hasBeenUsed = false;
-	for(let i = 0; i < users.users.length; i++){
-		if(users.users[i].id == newUser.id){
+	for(let i = 0; i < incidentsObject.length; i++){
+		if(incidentsObject.id == newUser.id){
 			hasBeenUsed = true;
 		}
 	}
 	if(hasBeenUsed) {
-		console.log("ERROR: Attempt to add user failed because User ID has already been used.");
-		res.status(500).send('Error: User ID already exists.');
+		console.log("ERROR: Attempt to add incident failed because the case number has already been used.");
+		res.status(500).send('Error: Case number already exists.');
 	} else {
-		users.users.push(newUser);
-		fs.writeFile(path.join(public_dir, 'list.json'), JSON.stringify(users, null, 4), (err) => {
-			res.status(200).send('Successfully added the user.');
-		});
+		incidentsObject[newCaseNumber] = newIncident;
+		res.status(200).send('Successfully added the user.');
 	}
 });
 
