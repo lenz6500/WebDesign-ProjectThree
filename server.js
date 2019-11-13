@@ -48,6 +48,7 @@ db.all("SELECT * FROM Incidents ORDER BY date_time DESC LIMIT 10000", (err, rows
 	for(var i = 0; i < rows.length; i++){
 		var newDate = rows[i].date_time.substring(0,10);
 		var newTime = rows[i].date_time.substring(11);
+        newTime = newTime.substring(0, newTime.indexOf('.'));
 		var iObject;
 		var report = {
 			date: newDate,
