@@ -57,6 +57,9 @@ db.all("SELECT * FROM Incidents ORDER BY case_number DESC", (err, rows) => {
 		};
 		incidentsObject[rows[i].case_number] = report;
 	}
+	incidentsObject.sort(function(a, b){
+		return b[rows[i].case_number] - a[rows[i].case_number];
+	});
 });
 
 
