@@ -30,7 +30,6 @@ db.all("SELECT * FROM Codes ORDER BY code", (err, rows) => {
 	for(var i = 0; i < rows.length; i++){
 		cObject = 'C' + rows[i].code;
 		codesObject[cObject] = rows[i].incident_type;
-		//codesObject[rows[i].code] = rows[i].incident_type;
 	}
 });
 
@@ -168,8 +167,14 @@ app.get('/neighborhoods', (req, res) => {
 });
 
 app.get('/incidents', (req, res) => {
-    var start_date = new Date(req.query.start_date);
-    var end_date = new Date(req.query.end_date);
+    var start_date = null;
+    var end_date = null;
+    if (req.query.start_date != null){
+        start_date = new Date(req.query.start_date);
+    }
+    if (req.query.end_date != null){
+        end_date = new Date(req.query.end_date);
+    }
     var codeRange = req.query.code;
     if (codeRange != null){
         var lowerCode = codeRange.slice(0, codeRange.indexOf(','));
@@ -185,23 +190,105 @@ app.get('/incidents', (req, res) => {
         var lowerNeighborhood = neighborhoodRange.slice(0, neighborhoodRange.indexOf(','));
         var upperNeighborhood = neighborhoodRange.slice(neighborhoodRange.indexOf(',')+1);
     }
-    var limit = req.query.limit;
-	if(limit="undefined"){
-		limit = 10000;
-	}
+    var limit = 10000;
     var format = req.query.format;
+    if (format == null){
+        format = 'json';
+    }
 
+    if (req.query.limit != null){
+        limit = req.query.limit;
+    }
+
+    /*Narrows down by date*/
     keys = Object.keys(incidentsObject);
     var newIncidentsObject = new Object;
-    if (start_date != null){
+    var dateIncidentsObject = new Object;
+    if (start_date != null && end_date != null){
         for(var i = 0; i < keys.length; i++){
             var currDate = new Date(incidentsObject[keys[i]].date);
-            if (currDate.getTime() >= start_date.getTime()){
-                newIncidentsObject[keys[i]]=incidentsObject[keys[i]];
+            if (currDate.getTime() >= start_date.getTime() && currDate.getTime() <= end_date.getTime()){
+                dateIncidentsObject[keys[i]]=incidentsObject[keys[i]];
             }
         }
     }
-	res.type('json').send(JSON.stringify(newIncidentsObject, null, 4));
+    else if (start_date != null && end_date == null){
+        for(var i = 0; i < keys.length; i++){
+            var currDate = new Date(incidentsObject[keys[i]].date);
+            if (currDate.getTime() >= start_date.getTime()){
+                dateIncidentsObject[keys[i]]=incidentsObject[keys[i]];
+            }
+        }
+    }
+    else if (start_date == null && end_date != null){
+        for(var i = 0; i < keys.length; i++){
+            var currDate = new Date(incidentsObject[keys[i]].date);
+            if (currDate.getTime() <= end_date.getTime()){
+                dateIncidentsObject[keys[i]]=incidentsObject[keys[i]];
+            }
+        }
+    }
+    else{
+        for(var i = 0; i < keys.length; i++){
+            dateIncidentsObject[keys[i]]=incidentsObject[keys[i]];
+        }
+    }
+
+    /*Narrows down by code*/
+    codeIncidentsObject = new Object;
+    newKeys = Object.keys(dateIncidentsObject);
+    if (codeRange != null){
+        for (var i = 0; i < newKeys.length; i++){
+            if (parseInt(dateIncidentsObject[newKeys[i]].code) >= lowerCode && parseInt(dateIncidentsObject[newKeys[i]].code) <= upperCode){
+                codeIncidentsObject[newKeys[i]]=dateIncidentsObject[newKeys[i]];
+            }
+        }
+    }
+    else{
+        codeIncidentsObject = dateIncidentsObject;
+    }
+
+    /*Narrows down by grid*/
+    gridTempIncidentsObject = new Object;
+    newKeys = Object.keys(codeIncidentsObject);
+    if (gridRange != null){
+        for (var i = 0; i < newKeys.length; i++){
+            if (parseInt(codeIncidentsObject[newKeys[i]].police_grid) >= lowerGrid && parseInt(codeIncidentsObject[newKeys[i]].police_grid) <= upperGrid){
+                gridTempIncidentsObject[newKeys[i]]=codeIncidentsObject[newKeys[i]];
+            }
+        }
+    }
+    else{
+        gridTempIncidentsObject = codeIncidentsObject;
+    }
+
+    /*Narrows by neighborhood*/
+    neighborhoodTempIncidentsObject = new Object;
+    newKeys = Object.keys(gridTempIncidentsObject);
+    if (neighborhoodRange != null){
+        for (var i = 0; i < newKeys.length; i++){
+            if (parseInt(gridTempIncidentsObject[newKeys[i]].neighborhood_number) >= lowerNeighborhood && parseInt(gridTempIncidentsObject[newKeys[i]].neighborhood_number) <= upperNeighborhood){
+                neighborhoodTempIncidentsObject[newKeys[i]]=gridTempIncidentsObject[newKeys[i]];
+            }
+        }
+    }
+    else{
+        neighborhoodTempIncidentsObject = gridTempIncidentsObject;
+    }
+
+    /*Narrows by limit*/
+    newKeys = Object.keys(neighborhoodTempIncidentsObject);
+    var finalIncidentsObject = new Object;
+    for (var j = 0; j < limit; j++){
+        finalIncidentsObject[newKeys[j]]=neighborhoodTempIncidentsObject[newKeys[j]];
+    }
+
+    /*Narrows by format*/
+    if (format == 'xml'){
+        res.type('xml').send(js2xmlparser.parse("Incidents", finalIncidentsObject));
+    }else{
+        res.type('json').send(JSON.stringify(finalIncidentsObject, null, 4));
+    }
 });
 
 app.put('/new_incident', (req, res) => {
@@ -215,7 +302,7 @@ app.put('/new_incident', (req, res) => {
         neighborhood_number: req.body.neighborhood_number,
         block: req.body.block
 	};
-7
+
 	var hasBeenUsed = false;
 	for(i in incidentsObject){
 		if(i == req.body.case_number){
