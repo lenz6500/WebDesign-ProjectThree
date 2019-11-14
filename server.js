@@ -63,7 +63,6 @@ db.all("SELECT * FROM Incidents ORDER BY date_time DESC LIMIT 10000", (err, rows
 	}
 });
 
-
 app.get('/codes', (req, res) => {
     var range = Object.keys(codesObject).length;
     var lowerRange = 0;
