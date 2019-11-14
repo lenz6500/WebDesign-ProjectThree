@@ -16,9 +16,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/lenz6500/WebDesign-ProjectThree.git"
+    "url": "https://github.com/lenz6500/WebDesign-ProjectThree.git"
   },
   "author": "Devin Lenz",
+  "contributor": "Nick Hillemeier",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/lenz6500/WebDesign-ProjectThree/issues"
