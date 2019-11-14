@@ -183,10 +183,11 @@ app.put('/new_incident', (req, res) => {
         neighborhood_number: req.body.neighborhood_number,
         block: req.body.block
 	};
-
+7
 	var hasBeenUsed = false;
-	for(let i = 0; i < incidentsObject.length; i++){
-		if(incidentsObject.id == newUser.id){
+	for(i in incidentsObject){
+		console.log(i);
+		if(i == req.body.case_number){
 			hasBeenUsed = true;
 		}
 	}
