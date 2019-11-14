@@ -42,7 +42,7 @@ db.all("SELECT * FROM Neighborhoods ORDER BY neighborhood_number", (err, rows) =
 	}
 });
 
-db.all("SELECT * FROM Incidents ORDER BY date_time DESC LIMIT 10000", (err, rows) => {
+db.all("SELECT * FROM Incidents ORDER BY date_time DESC", (err, rows) => {
     var iObject;
 	for(var i = 0; i < rows.length; i++){
 		var newDate = rows[i].date_time.substring(0,10);
@@ -186,6 +186,9 @@ app.get('/incidents', (req, res) => {
         var upperNeighborhood = neighborhoodRange.slice(neighborhoodRange.indexOf(',')+1);
     }
     var limit = req.query.limit;
+	if(limit="undefined"){
+		limit = 10000;
+	}
     var format = req.query.format;
 
     keys = Object.keys(incidentsObject);
@@ -215,7 +218,6 @@ app.put('/new_incident', (req, res) => {
 7
 	var hasBeenUsed = false;
 	for(i in incidentsObject){
-		console.log(i);
 		if(i == req.body.case_number){
 			hasBeenUsed = true;
 		}
