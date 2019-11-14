@@ -42,7 +42,6 @@ db.all("SELECT * FROM Neighborhoods ORDER BY neighborhood_number", (err, rows) =
 	}
 });
 
-/* Need to fix this */
 db.all("SELECT * FROM Incidents ORDER BY date_time DESC LIMIT 10000", (err, rows) => {
     var iObject;
 	for(var i = 0; i < rows.length; i++){
@@ -170,7 +169,37 @@ app.get('/neighborhoods', (req, res) => {
 });
 
 app.get('/incidents', (req, res) => {
-	res.type('json').send(JSON.stringify(incidentsObject, null, 4));
+    var start_date = new Date(req.query.start_date);
+    var end_date = new Date(req.query.end_date);
+    var codeRange = req.query.code;
+    if (codeRange != null){
+        var lowerCode = codeRange.slice(0, codeRange.indexOf(','));
+        var upperCode = codeRange.slice(codeRange.indexOf(',')+1);
+    }
+    var gridRange = req.query.grid;
+    if (gridRange != null){
+        var lowerGrid = gridRange.slice(0, gridRange.indexOf(','));
+        var upperGrid = gridRange.slice(gridRange.indexOf(',')+1);
+    }
+    var neighborhoodRange = req.query.id;
+    if (neighborhoodRange != null){
+        var lowerNeighborhood = neighborhoodRange.slice(0, neighborhoodRange.indexOf(','));
+        var upperNeighborhood = neighborhoodRange.slice(neighborhoodRange.indexOf(',')+1);
+    }
+    var limit = req.query.limit;
+    var format = req.query.format;
+
+    keys = Object.keys(incidentsObject);
+    var newIncidentsObject = new Object;
+    if (start_date != null){
+        for(var i = 0; i < keys.length; i++){
+            var currDate = new Date(incidentsObject[keys[i]].date);
+            if (currDate.getTime() >= start_date.getTime()){
+                newIncidentsObject[keys[i]]=incidentsObject[keys[i]];
+            }
+        }
+    }
+	res.type('json').send(JSON.stringify(newIncidentsObject, null, 4));
 });
 
 app.put('/new_incident', (req, res) => {
