@@ -82,9 +82,11 @@ app.get('/codes', (req, res) => {
         }
         if (format == 'xml'){
             res.type('xml').send(js2xmlparser.parse("Codes", codesObject));
+            res.type('xml').send(js2xmlparser.parse("Codes", newCodesObject));
         }
         else{
             res.type('json').send(JSON.stringify(codesObject, null, 4));
+            res.type('json').send(JSON.stringify(newCodesObject, null, 4));
         }
     }
     else if (req.query.code != null && req.query.format == null){
@@ -309,11 +311,14 @@ app.put('/new_incident', (req, res) => {
 			hasBeenUsed = true;
 		}
 	}
+    var newDateTime = req.body.date + 'T' + req.body.time;
+    var data = [newCaseNumber, newDateTime, req.body.code, req.body.incident, req.body.police_grid, req.body.neighborhood_number, req.body.block];
 	if(hasBeenUsed) {
 		console.log("ERROR: Attempt to add incident failed because the case number has already been used.");
 		res.status(500).send('Error: Case number already exists.');
 	} else {
 		incidentsObject[newCaseNumber] = newIncident;
+<<<<<<< HEAD
 		
 		var sql = "INSERT INTO Incidents (case_number, date_time, code, incident, police_grid, neighborhood_number, block) VALUES ('" + newCaseNumber + "', '" + newIncident.date + "T" + newIncident.time + "', '" + newIncident.code + "', '" + newIncident.incident + "', '" + newIncident.police_grid + "', '" + newIncident.neighborhood_number + "', '" + newIncident.block + "')";
 		console.log(sql);
@@ -324,6 +329,17 @@ app.put('/new_incident', (req, res) => {
 			}
 			res.status(200).send('Successfully added the user.');
 		});	
+=======
+        db.run("INSERT INTO Incidents(case_number, date_time, code, incident, police_grid, neighborhood_number, block) VALUES(?, ?, ?, ?, ?, ?, ?)", data, err => {
+            if (err){
+                res.status(500).send('Error uploading data to database');
+                console.log("ERROR: Could not upload data to database");
+            }
+            else{
+                res.status(200).send('Successfully added the incident.');
+            }
+        });
+>>>>>>> e3f0dfe21b8fb0115d64bb36533143aa90287fd4
 	}
 });
 
