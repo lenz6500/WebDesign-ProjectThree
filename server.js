@@ -16,7 +16,7 @@ var codesObject = new Object;
 var neighborhoodsObject = new Object;
 var incidentsObject = new Object;
 
-var db = new sqlite3.Database(db_filename, sqlite3.OPEN_READONLY, (err) => {
+var db = new sqlite3.Database(db_filename, sqlite3.OPEN_READWRITE, (err) => {
     if (err) {
         console.log('Error opening ' + db_filename);
     }
@@ -314,7 +314,16 @@ app.put('/new_incident', (req, res) => {
 		res.status(500).send('Error: Case number already exists.');
 	} else {
 		incidentsObject[newCaseNumber] = newIncident;
-		res.status(200).send('Successfully added the user.');
+		
+		var sql = "INSERT INTO Incidents (case_number, date_time, code, incident, police_grid, neighborhood_number, block) VALUES ('" + newCaseNumber + "', '" + newIncident.date + "T" + newIncident.time + "', '" + newIncident.code + "', '" + newIncident.incident + "', '" + newIncident.police_grid + "', '" + newIncident.neighborhood_number + "', '" + newIncident.block + "')";
+		console.log(sql);
+		db.run(sql, (err, result)=>{
+			if(err){
+				console.log("Data wasn't inserted.");
+				console.log(err);
+			}
+			res.status(200).send('Successfully added the user.');
+		});	
 	}
 });
 
