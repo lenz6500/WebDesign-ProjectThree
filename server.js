@@ -16,7 +16,7 @@ var codesObject = new Object;
 var neighborhoodsObject = new Object;
 var incidentsObject = new Object;
 
-var db = new sqlite3.Database(db_filename, sqlite3.OPEN_READONLY, (err) => {
+var db = new sqlite3.Database(db_filename, sqlite3.OPEN_READWRITE, (err) => {
     if (err) {
         console.log('Error opening ' + db_filename);
     }
@@ -81,10 +81,10 @@ app.get('/codes', (req, res) => {
             }
         }
         if (format == 'xml'){
-            res.type('xml').send(js2xmlparser.parse("Codes", codesObject));
+            res.type('xml').send(js2xmlparser.parse("Codes", newCodesObject));
         }
         else{
-            res.type('json').send(JSON.stringify(codesObject, null, 4));
+            res.type('json').send(JSON.stringify(newCodesObject, null, 4));
         }
     }
     else if (req.query.code != null && req.query.format == null){
@@ -309,12 +309,22 @@ app.put('/new_incident', (req, res) => {
 			hasBeenUsed = true;
 		}
 	}
+    var newDateTime = req.body.date + 'T' + req.body.time;
+    var data = [newCaseNumber, newDateTime, req.body.code, req.body.incident, req.body.police_grid, req.body.neighborhood_number, req.body.block];
 	if(hasBeenUsed) {
 		console.log("ERROR: Attempt to add incident failed because the case number has already been used.");
 		res.status(500).send('Error: Case number already exists.');
 	} else {
 		incidentsObject[newCaseNumber] = newIncident;
-		res.status(200).send('Successfully added the user.');
+        db.run("INSERT INTO Incidents(case_number, date_time, code, incident, police_grid, neighborhood_number, block) VALUES(?, ?, ?, ?, ?, ?, ?)", data, err => {
+            if (err){
+                res.status(500).send('Error uploading data to database');
+                console.log("ERROR: Could not upload data to database");
+            }
+            else{
+                res.status(200).send('Successfully added the incident.');
+            }
+        });
 	}
 });
 
