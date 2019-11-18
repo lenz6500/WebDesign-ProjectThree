@@ -81,7 +81,6 @@ app.get('/codes', (req, res) => {
             }
         }
         if (format == 'xml'){
-            res.type('xml').send(js2xmlparser.parse("Codes", codesObject));
             res.type('xml').send(js2xmlparser.parse("Codes", newCodesObject));
         }
         else{
