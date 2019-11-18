@@ -63,21 +63,22 @@ db.all("SELECT * FROM Incidents ORDER BY date_time DESC", (err, rows) => {
 });
 
 app.get('/codes', (req, res) => {
-    var range = Object.keys(codesObject).length;
-    var lowerRange = 0;
-    var upperRange = 0;
+    var values;
     var format = 'json';
 
     if (req.query.code != null && req.query.format != null){
-        range = req.query.code;
+        values = req.query.code.split(',');
         format = req.query.format;
-        lowerRange = range.slice(0, range.indexOf(','));
-        upperRange = range.slice(range.indexOf(',')+1);
+        for (var i = 0; i < values.length; i++){
+            values[i] = parseInt(values[i], 10);
+        }
         var newCodesObject = new Object;
         var keys = Object.keys(codesObject);
         for (var i = 0; i < keys.length; i++){
-            if (parseInt(keys[i].slice(1)) >= lowerRange && parseInt(keys[i].slice(1)) <= upperRange){
-                newCodesObject[keys[i]]=codesObject[keys[i]];
+            for (var j = 0; j < values.length; j++){
+                if (parseInt(keys[i].slice(1)) == values[j]){
+                    newCodesObject[keys[i]]=codesObject[keys[i]];
+                }
             }
         }
         if (format == 'xml'){
@@ -88,14 +89,17 @@ app.get('/codes', (req, res) => {
         }
     }
     else if (req.query.code != null && req.query.format == null){
-        range = req.query.code;
-        lowerRange = range.slice(0, range.indexOf(','));
-        upperRange = range.slice(range.indexOf(',')+1);
+        values = req.query.code.split(',');
+        for (var i = 0; i < values.length; i++){
+            values[i] = parseInt(values[i], 10);
+        }
         var newCodesObject = new Object;
         var keys = Object.keys(codesObject);
         for (var i = 0; i < keys.length; i++){
-            if (parseInt(keys[i].slice(1)) >= lowerRange && parseInt(keys[i].slice(1)) <= upperRange){
-                newCodesObject[keys[i]]=codesObject[keys[i]];
+            for (var j = 0; j < values.length; j++){
+                if (parseInt(keys[i].slice(1)) == values[j]){
+                    newCodesObject[keys[i]]=codesObject[keys[i]];
+                }
             }
         }
         res.type(format).send(JSON.stringify(newCodesObject, null, 4));
@@ -115,21 +119,22 @@ app.get('/codes', (req, res) => {
 });
 
 app.get('/neighborhoods', (req, res) => {
-    var range = Object.keys(neighborhoodsObject).length;
-    var lowerRange = 0;
-    var upperRange = 0;
+    var values;
     var format = 'json';
 
     if (req.query.id != null && req.query.format != null){
-        range = req.query.id;
+        values = req.query.id.split(',');
         format = req.query.format;
-        lowerRange = range.slice(0, range.indexOf(','));
-        upperRange = range.slice(range.indexOf(',')+1);
+        for (var i = 0; i < values.length; i++){
+            values[i] = parseInt(values[i], 10);
+        }
         var newNeighborhoodsObject = new Object;
         var keys = Object.keys(neighborhoodsObject);
         for (var i = 0; i < keys.length; i++){
-            if (parseInt(keys[i].slice(1)) >= lowerRange && parseInt(keys[i].slice(1)) <= upperRange){
-                newNeighborhoodsObject[keys[i]]=neighborhoodsObject[keys[i]];
+            for (var j = 0; j < values.length; j++){
+                if (parseInt(keys[i].slice(1)) == values[j]){
+                    newNeighborhoodsObject[keys[i]]=neighborhoodsObject[keys[i]];
+                }
             }
         }
         if (format == 'xml'){
@@ -140,14 +145,17 @@ app.get('/neighborhoods', (req, res) => {
         }
     }
     else if (req.query.id != null && req.query.format == null){
-        range = req.query.id;
-        lowerRange = range.slice(0, range.indexOf(','));
-        upperRange = range.slice(range.indexOf(',')+1);
+        values = req.query.id.split(',');
+        for (var i = 0; i < values.length; i++){
+            values[i] = parseInt(values[i], 10);
+        }
         var newNeighborhoodsObject = new Object;
         var keys = Object.keys(neighborhoodsObject);
         for (var i = 0; i < keys.length; i++){
-            if (parseInt(keys[i].slice(1)) >= lowerRange && parseInt(keys[i].slice(1)) <= upperRange){
-                newNeighborhoodsObject[keys[i]]=neighborhoodsObject[keys[i]];
+            for (var j = 0; j < values.length; j++){
+                if (parseInt(keys[i].slice(1)) == values[j]){
+                    newNeighborhoodsObject[keys[i]]=neighborhoodsObject[keys[i]];
+                }
             }
         }
         res.type(format).send(JSON.stringify(newNeighborhoodsObject, null, 4));
@@ -175,20 +183,26 @@ app.get('/incidents', (req, res) => {
     if (req.query.end_date != null){
         end_date = new Date(req.query.end_date);
     }
-    var codeRange = req.query.code;
-    if (codeRange != null){
-        var lowerCode = codeRange.slice(0, codeRange.indexOf(','));
-        var upperCode = codeRange.slice(codeRange.indexOf(',')+1);
+    var codeValues = req.query.code;
+    if (codeValues != null){
+        codeValues = req.query.code.split(',');
+        for (var i = 0; i < codeValues.length; i++){
+            codeValues[i] = parseInt(codeValues[i], 10);
+        }
     }
-    var gridRange = req.query.grid;
-    if (gridRange != null){
-        var lowerGrid = gridRange.slice(0, gridRange.indexOf(','));
-        var upperGrid = gridRange.slice(gridRange.indexOf(',')+1);
+    var gridValues = req.query.grid;
+    if (gridValues != null){
+        gridValues = req.query.grid.split(',');
+        for (var i = 0; i < gridValues.length; i++){
+            gridValues[i] = parseInt(gridValues[i], 10);
+        }
     }
-    var neighborhoodRange = req.query.id;
-    if (neighborhoodRange != null){
-        var lowerNeighborhood = neighborhoodRange.slice(0, neighborhoodRange.indexOf(','));
-        var upperNeighborhood = neighborhoodRange.slice(neighborhoodRange.indexOf(',')+1);
+    var neighborhoodValues = req.query.id;
+    if (neighborhoodValues != null){
+        neighborhoodValues = req.query.id.split(',');
+        for (var i = 0; i < neighborhoodValues.length; i++){
+            neighborhoodValues[i] = parseInt(neighborhoodValues[i], 10);
+        }
     }
     var limit = 10000;
     var format = req.query.format;
@@ -237,10 +251,12 @@ app.get('/incidents', (req, res) => {
     /*Narrows down by code*/
     codeIncidentsObject = new Object;
     newKeys = Object.keys(dateIncidentsObject);
-    if (codeRange != null){
+    if (codeValues != null){
         for (var i = 0; i < newKeys.length; i++){
-            if (parseInt(dateIncidentsObject[newKeys[i]].code) >= lowerCode && parseInt(dateIncidentsObject[newKeys[i]].code) <= upperCode){
-                codeIncidentsObject[newKeys[i]]=dateIncidentsObject[newKeys[i]];
+            for (var j = 0; j < codeValues.length; j++){
+                if (parseInt(dateIncidentsObject[newKeys[i]].code) == codeValues[j]){
+                    codeIncidentsObject[newKeys[i]]=dateIncidentsObject[newKeys[i]];
+                }
             }
         }
     }
@@ -251,10 +267,12 @@ app.get('/incidents', (req, res) => {
     /*Narrows down by grid*/
     gridTempIncidentsObject = new Object;
     newKeys = Object.keys(codeIncidentsObject);
-    if (gridRange != null){
+    if (gridValues != null){
         for (var i = 0; i < newKeys.length; i++){
-            if (parseInt(codeIncidentsObject[newKeys[i]].police_grid) >= lowerGrid && parseInt(codeIncidentsObject[newKeys[i]].police_grid) <= upperGrid){
-                gridTempIncidentsObject[newKeys[i]]=codeIncidentsObject[newKeys[i]];
+            for (var j = 0; j < gridValues.length; j++){
+                if (parseInt(codeIncidentsObject[newKeys[i]].police_grid) == gridValues[j]){
+                    gridTempIncidentsObject[newKeys[i]]=codeIncidentsObject[newKeys[i]];
+                }
             }
         }
     }
@@ -265,10 +283,12 @@ app.get('/incidents', (req, res) => {
     /*Narrows by neighborhood*/
     neighborhoodTempIncidentsObject = new Object;
     newKeys = Object.keys(gridTempIncidentsObject);
-    if (neighborhoodRange != null){
+    if (neighborhoodValues != null){
         for (var i = 0; i < newKeys.length; i++){
-            if (parseInt(gridTempIncidentsObject[newKeys[i]].neighborhood_number) >= lowerNeighborhood && parseInt(gridTempIncidentsObject[newKeys[i]].neighborhood_number) <= upperNeighborhood){
-                neighborhoodTempIncidentsObject[newKeys[i]]=gridTempIncidentsObject[newKeys[i]];
+            for (var j = 0; j < neighborhoodValues.length; j++){
+                if (parseInt(gridTempIncidentsObject[newKeys[i]].neighborhood_number) == neighborhoodValues[j]){
+                    neighborhoodTempIncidentsObject[newKeys[i]]=gridTempIncidentsObject[newKeys[i]];
+                }
             }
         }
     }
