@@ -88,16 +88,24 @@ app.get('/codes', (req, res) => {
         }
     }
     else if (req.query.code != null && req.query.format == null){
-        range = req.query.code;
-        lowerRange = range.slice(0, range.indexOf(','));
-        upperRange = range.slice(range.indexOf(',')+1);
-        var newCodesObject = new Object;
-        var keys = Object.keys(codesObject);
-        for (var i = 0; i < keys.length; i++){
-            if (parseInt(keys[i].slice(1)) >= lowerRange && parseInt(keys[i].slice(1)) <= upperRange){
-                newCodesObject[keys[i]]=codesObject[keys[i]];
-            }
-        }
+        //range = req.query.code;
+		//console.log(range);
+		codeArr = req.query.code.split(',');
+	    var newCodesObject = new Object;	
+		for(var key = 0; key < codeArr.length; key++){
+			console.log(codesObject["C"+codeArr[key]]);
+			newCodesObject[codeArr[key]] = codesObject[codeArr[key]];
+			console.log(newCodesObject[codeArr[key]]);
+		}
+        //lowerRange = range.slice(0, range.indexOf(','));
+        //upperRange = range.slice(range.indexOf(',')+1);
+ 
+       // var keys = Object.keys(codesObject);
+        //for (var i = 0; i < keys.length; i++){
+        //    if (parseInt(keys[i].slice(1)) >= lowerRange && parseInt(keys[i].slice(1)) <= upperRange){
+        //        newCodesObject[keys[i]]=codesObject[keys[i]];
+        //    }
+        //}
         res.type(format).send(JSON.stringify(newCodesObject, null, 4));
     }
     else if (req.query.code == null && req.query.format != null){
@@ -315,7 +323,8 @@ app.put('/new_incident', (req, res) => {
 		console.log("ERROR: Attempt to add incident failed because the case number has already been used.");
 		res.status(500).send('Error: Case number already exists.');
 	} else {
-		incidentsObject[newCaseNumber] = newIncident;
+		var incNum = "I" + newCaseNumber;
+		incidentsObject[i] = newIncident;
         db.run("INSERT INTO Incidents(case_number, date_time, code, incident, police_grid, neighborhood_number, block) VALUES(?, ?, ?, ?, ?, ?, ?)", data, err => {
             if (err){
                 res.status(500).send('Error uploading data to database');
