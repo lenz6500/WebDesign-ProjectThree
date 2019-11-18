@@ -85,7 +85,6 @@ app.get('/codes', (req, res) => {
             res.type('xml').send(js2xmlparser.parse("Codes", newCodesObject));
         }
         else{
-            res.type('json').send(JSON.stringify(codesObject, null, 4));
             res.type('json').send(JSON.stringify(newCodesObject, null, 4));
         }
     }
