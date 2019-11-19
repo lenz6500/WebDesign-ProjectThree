@@ -5,12 +5,14 @@ var bodyParser = require('body-parser');
 var js2xmlparser = require('js2xmlparser');
 var sqlite3 = require('sqlite3');
 var sortObj = require('sort-object');
+var cors = require('cors');
 
 var port = 8000;
 var db_filename = path.join(__dirname, 'db', 'stpaul_crime.sqlite3');
 
 var app = express();
 app.use(bodyParser.urlencoded({extended: true}));
+app.use(cors());
 
 var codesObject = new Object;
 var neighborhoodsObject = new Object;
