@@ -16,7 +16,6 @@ app.use(cors());
 
 var codesObject = new Object;
 var neighborhoodsObject = new Object;
-var incidentsObject = new Object;
 
 var db = new sqlite3.Database(db_filename, sqlite3.OPEN_READWRITE, (err) => {
     if (err) {
@@ -27,8 +26,8 @@ var db = new sqlite3.Database(db_filename, sqlite3.OPEN_READWRITE, (err) => {
     }
 });
 
-
 app.get('/codes', (req, res) => {
+	
 	db.all("SELECT * FROM Codes ORDER BY code", (err, rows) => {
 		var cObject;
 		for(var i = 0; i < rows.length; i++){
@@ -159,6 +158,7 @@ app.get('/neighborhoods', (req, res) => {
 app.get('/incidents', (req, res) => {
 	db.all("SELECT * FROM Incidents ORDER BY date_time DESC", (err, rows) => {
 		var iObject;
+		var incidentsObject = new Object;
 		for(var i = 0; i < rows.length; i++){
 			var newDate = rows[i].date_time.substring(0,10);
 			var newTime = rows[i].date_time.substring(11);
@@ -326,27 +326,27 @@ app.put('/new_incident', (req, res) => {
 	};
 
 	var hasBeenUsed = false;
-	for(i in incidentsObject){
-		if(i == req.body.case_number){
+	db.all("SELECT * FROM Incidents WHERE case_number= ? ORDER BY date_time DESC", req.body.case_number, (err, rows) => {
+		if(rows.length != 0){
 			hasBeenUsed = true;
 		}
-	}
-    var newDateTime = req.body.date + 'T' + req.body.time;
-    var data = [newCaseNumber, newDateTime, req.body.code, req.body.incident, req.body.police_grid, req.body.neighborhood_number, req.body.block];
-	if(hasBeenUsed) {
-		console.log("ERROR: Attempt to add incident failed because the case number has already been used.");
-		res.status(500).send('Error: Case number already exists.');
-	} else {
-        db.run("INSERT INTO Incidents(case_number, date_time, code, incident, police_grid, neighborhood_number, block) VALUES(?, ?, ?, ?, ?, ?, ?)", data, err => {
-            if (err){
-                res.status(500).send('Error uploading data to database');
-                console.log("ERROR: Could not upload data to database");
-            }
-            else{
-                res.status(200).send('Successfully added the incident.');
-            }
-        });
-	}
+		var newDateTime = req.body.date + 'T' + req.body.time;
+		var data = [newCaseNumber, newDateTime, req.body.code, req.body.incident, req.body.police_grid, req.body.neighborhood_number, req.body.block];
+		if(hasBeenUsed) {
+			console.log("ERROR: Attempt to add incident failed because the case number has already been used.");
+			res.status(500).send('Error: Case number already exists.');
+		} else {
+			db.run("INSERT INTO Incidents(case_number, date_time, code, incident, police_grid, neighborhood_number, block) VALUES(?, ?, ?, ?, ?, ?, ?)", data, err => {
+				if (err){
+					res.status(500).send('Error uploading data to database');
+					console.log("ERROR: Could not upload data to database");
+				}
+				else{
+					res.status(200).send('Successfully added the incident.');
+				}
+			});
+		}
+	});
 });
 
 function ReadFile(filename) { //Simple read file option.
