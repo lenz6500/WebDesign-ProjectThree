@@ -337,8 +337,10 @@ app.put('/new_incident', (req, res) => {
 		console.log("ERROR: Attempt to add incident failed because the case number has already been used.");
 		res.status(500).send('Error: Case number already exists.');
 	} else {
-		var incNum = "I" + newCaseNumber;
-		incidentsObject[i] = newIncident;
+		var incNum = "I" + req.body.case_number;
+		incidentsObject[incNum] = newIncident;
+		//iObject = 'I' + rows[i].case_number;
+		//incidentsObject[iObject] = report;
         db.run("INSERT INTO Incidents(case_number, date_time, code, incident, police_grid, neighborhood_number, block) VALUES(?, ?, ?, ?, ?, ?, ?)", data, err => {
             if (err){
                 res.status(500).send('Error uploading data to database');
