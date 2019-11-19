@@ -25,7 +25,7 @@ var db = new sqlite3.Database(db_filename, sqlite3.OPEN_READWRITE, (err) => {
         console.log('Now connected to ' + db_filename);
     }
 });
-
+/*codes page*/
 app.get('/codes', (req, res) => {
 	
 	db.all("SELECT * FROM Codes ORDER BY code", (err, rows) => {
@@ -37,7 +37,7 @@ app.get('/codes', (req, res) => {
 
 		var values;
 		var format = 'json';
-
+		/*Both extra parameters are used*/
 		if (req.query.code != null && req.query.format != null){
 			values = req.query.code.split(',');
 			format = req.query.format;
@@ -60,6 +60,7 @@ app.get('/codes', (req, res) => {
 				res.type('json').send(JSON.stringify(newCodesObject, null, 4));
 			}
 		}
+		/*Only codes extra parameter is used*/
 		else if (req.query.code != null && req.query.format == null){
 			values = req.query.code.split(',');
 			for (var i = 0; i < values.length; i++){
@@ -76,6 +77,7 @@ app.get('/codes', (req, res) => {
 			}
 			res.type(format).send(JSON.stringify(newCodesObject, null, 4));
 		}
+		/*Only format extra parameter is used*/
 		else if (req.query.code == null && req.query.format != null){
 			format = req.query.format;
 			if (format == 'xml'){
@@ -85,12 +87,13 @@ app.get('/codes', (req, res) => {
 				res.type('json').send(JSON.stringify(codesObject, null, 4));
 			}
 		}
+		/*Base case*/
 		else{
 			res.type(format).send(JSON.stringify(codesObject, null, 4));
 		}
 	});
 });
-
+/*Neighborhoods page*/
 app.get('/neighborhoods', (req, res) => {
 
 	db.all("SELECT * FROM Neighborhoods ORDER BY neighborhood_number", (err, rows) => {
@@ -101,7 +104,7 @@ app.get('/neighborhoods', (req, res) => {
 		}
 		var values;
 		var format = 'json';
-
+		/*Both extra parameters are used*/
 		if (req.query.id != null && req.query.format != null){
 			values = req.query.id.split(',');
 			format = req.query.format;
@@ -124,6 +127,7 @@ app.get('/neighborhoods', (req, res) => {
 				res.type('json').send(JSON.stringify(newNeighborhoodsObject, null, 4));
 			}
 		}
+		/*Only id parameter is used*/
 		else if (req.query.id != null && req.query.format == null){
 			values = req.query.id.split(',');
 			for (var i = 0; i < values.length; i++){
@@ -140,6 +144,7 @@ app.get('/neighborhoods', (req, res) => {
 			}
 			res.type(format).send(JSON.stringify(newNeighborhoodsObject, null, 4));
 		}
+		/*Only format parameter is used*/
 		else if (req.query.id == null && req.query.format != null){
 			format = req.query.format;
 			if (format == 'xml'){
@@ -149,12 +154,14 @@ app.get('/neighborhoods', (req, res) => {
 				res.type('json').send(JSON.stringify(neighborhoodsObject, null, 4));
 			}
 		}
+		/*Base case; neither parameter used.*/
 		else{
 			res.type(format).send(JSON.stringify(neighborhoodsObject, null, 4));
 		}
 	});
 });
 
+/*Incidents page*/
 app.get('/incidents', (req, res) => {
 	db.all("SELECT * FROM Incidents ORDER BY date_time DESC", (err, rows) => {
 		var iObject;
@@ -313,8 +320,10 @@ app.get('/incidents', (req, res) => {
 	});
 });
 
+/*Add a new crime to database*/
 app.put('/new_incident', (req, res) => {
     newCaseNumber = req.body.case_number;
+	/*create an object with all crime data*/
 	var newIncident = {
         date: req.body.date,
         time: req.body.time,
@@ -324,7 +333,7 @@ app.put('/new_incident', (req, res) => {
         neighborhood_number: req.body.neighborhood_number,
         block: req.body.block
 	};
-
+	/*Check to see if case_number has been already used within database*/
 	var hasBeenUsed = false;
 	db.all("SELECT * FROM Incidents WHERE case_number= ? ORDER BY date_time DESC", req.body.case_number, (err, rows) => {
 		if(rows.length != 0){
@@ -332,6 +341,7 @@ app.put('/new_incident', (req, res) => {
 		}
 		var newDateTime = req.body.date + 'T' + req.body.time;
 		var data = [newCaseNumber, newDateTime, req.body.code, req.body.incident, req.body.police_grid, req.body.neighborhood_number, req.body.block];
+		/*Create array with all data to add into database*/
 		if(hasBeenUsed) {
 			console.log("ERROR: Attempt to add incident failed because the case number has already been used.");
 			res.status(500).send('Error: Case number already exists.');
