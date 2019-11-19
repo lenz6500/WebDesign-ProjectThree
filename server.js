@@ -8,7 +8,7 @@ var sortObj = require('sort-object');
 var cors = require('cors');
 
 var port = 8000;
-var db_filename = path.join(__dirname, 'db', 'stpaul_crime.sqlite3');
+var db_filename = path.join(__dirname, 'stpaul_crime.sqlite3');
 
 var app = express();
 app.use(bodyParser.urlencoded({extended: true}));
