@@ -1,0 +1,38 @@
+{
+  "name": "webdesign-projectthree",
+  "version": "1.0.0",
+  "description": "RESTful Web Server",
+  "main": "server.js",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "js2xmlparser": "^4.0.0",
+    "json2xml": "^0.1.3",
+    "sort-object": "^3.0.3",
+    "sqlite3": "^4.1.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lenz6500/WebDesign-ProjectThree.git"
+  },
+  "author": "Devin Lenz",
+  "contributors": [
+      {
+          "name": "Devin Lenz",
+          "email": "lenz6500@stthomas.edu"
+      },
+      {
+          "name": "Nicholas Hillemeier",
+          "email": "hill6908@stthomas.edu"
+      }
+  ],
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/lenz6500/WebDesign-ProjectThree/issues"
+  },
+  "homepage": "https://github.com/lenz6500/WebDesign-ProjectThree#readme"
+}
